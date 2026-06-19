@@ -83,3 +83,16 @@ migrated — those users do not exist in Supabase Auth; account migration is a s
 
 NOTE: gradpilotai.com still has Vercel Deployment Protection ON (per owner's choice),
 so the populated content is visible via the protected/preview URL, not publicly yet.
+
+## Update — Rebuilt site deployed to PRODUCTION (19 June 2026)
+The lost Next.js source was rebuilt in-repo (Next.js 15 + Supabase) and is now the
+live production site:
+- `main` branch is the Vercel production branch; pushing it deploys gradpilotai.com.
+- Production deployment dpl_37V1PvY5bh64RtU5r9bTyfspuUR5 (commit on main) is READY.
+- Verified: gradpilotai.com/jobs renders "30 live roles" from Supabase; /jobs no
+  longer crashes; sitemap.xml + robots.txt present.
+- Supabase URL + anon key baked as fallback (public, RLS-protected) so data loads
+  regardless of Vercel env vars.
+- Deployment Protection remains ON (owner's choice) — site reachable via share link.
+- NOTE: a parallel branch `claude/adoring-cori-hupj9v` (separate session) also tried
+  to rebuild under web/ and is erroring; recommend retiring it to avoid collisions.
