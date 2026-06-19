@@ -8,9 +8,9 @@ import { Logo } from "./logo";
 import { btnPrimary, cn, sizeMd } from "@/lib/ui";
 
 const NAV_LINKS = [
-  { href: "/#features", label: "Features" },
+  { href: "/jobs", label: "Jobs" },
+  { href: "/adviser", label: "AI Adviser" },
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/#who-its-for", label: "Who it's for" },
   { href: "/#pricing", label: "Pricing" },
   { href: "/#faq", label: "FAQ" },
 ];

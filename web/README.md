@@ -30,6 +30,13 @@ npm run dev
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL (waitlist insert) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL (default `https://www.gradpilotai.com`) |
+| `ANTHROPIC_API_KEY` | Server-only. Powers the AI Career Adviser (Claude Opus 4.8) at `/adviser`. |
+
+## Features
+
+- **Marketing site** — home, about, blog, pricing, FAQ, legal, waitlist (writes to Supabase `waitlist_submissions`).
+- **`/jobs`** — visa-sponsoring job board, server-rendered from the Supabase `jobs` table, filterable by Graduate Route / Skilled Worker sponsorship.
+- **`/adviser`** — streaming AI career adviser on **Claude Opus 4.8** (adaptive thinking), via `/api/adviser`.
 
 The waitlist form inserts into the Supabase `waitlist` table. If the env vars
 aren't set, the form succeeds gracefully (no-op) so the UI still works in dev.

@@ -26,8 +26,8 @@ export function WaitlistForm() {
     try {
       if (supabaseEnabled && supabase) {
         const { error } = await supabase
-          .from("waitlist")
-          .insert({ name: name.trim(), email: email.trim().toLowerCase() });
+          .from("waitlist_submissions")
+          .insert({ full_name: name.trim(), email: email.trim().toLowerCase() });
         if (error) throw error;
       } else {
         // No Supabase env configured yet — succeed gracefully in dev.
