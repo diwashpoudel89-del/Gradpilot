@@ -20,6 +20,19 @@ working app, no Stripe checkout, empty `/blog`. Full report:
   sitemap.ts, metadataBase/canonical, security-headers next.config, JSON-LD,
   analytics guide).
 
+### Rebuilt the site into version control (`web/`)
+- **Critical finding:** the live site was deployed to Vercel **via CLI from an
+  ephemeral agent workspace — no Git source existed.** No repo to PR against.
+- Rebuilt the marketing site as a proper **Next.js 15 (App Router) + Tailwind v4**
+  project under `web/`, faithful to the live content, with **all audit fixes baked
+  in**: robots.ts, sitemap.ts, metadataBase/canonical, security headers (+CSP
+  report-only), JSON-LD (Org/FAQ/Product), Vercel Analytics + waitlist event,
+  real Privacy/Terms pages, working Supabase-backed waitlist form.
+- **Verified: `npm run build` passes** — 12 routes prerendered incl. /robots.txt
+  and /sitemap.xml. Pinned a patched Next (15.5.x) to avoid CVE-2025-66478.
+- Next step for owner: import the repo in Vercel (Root Directory = `web`), add env
+  vars, connect GitHub for CI/CD, repoint the domain. See `web/README.md`.
+
 ### Remaining (owner / needs live-site repo or dashboard)
 - Paste `site-fixes/` files into the live Next.js repo + redeploy (SEO, headers,
   analytics, JSON-LD).
