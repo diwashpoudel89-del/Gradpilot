@@ -1,5 +1,42 @@
 # GradPilot AI — Hardening Actions Log
 
+---
+
+## Update — 2026-06-19: Live site (Vercel/Next.js) audit
+
+### Key discovery
+The **live `gradpilotai.com` is a separate Next.js site on Vercel** in
+pre-launch/waitlist mode — NOT the Base44 app the 16 June audit covered. No
+working app, no Stripe checkout, empty `/blog`. Full report:
+`GradPilot_Live_Site_Audit_2026-06-19.md` (+ `.pdf`).
+
+### Done
+- Audited the live Vercel site (HTTP, headers, SEO, page inventory).
+- **Applied migration `0002_usage_tracking_initplan.sql`** to the live DB —
+  resolved the 2 `usage_tracking` `auth_rls_initplan` performance warnings
+  (verified via advisors). Base44 no longer manages this table since the product
+  moved to Next.js, so the prior re-sync concern is moot.
+- Added drop-in fixes for the Next.js site under `site-fixes/` (robots.ts,
+  sitemap.ts, metadataBase/canonical, security-headers next.config, JSON-LD,
+  analytics guide).
+
+### Remaining (owner / needs live-site repo or dashboard)
+- Paste `site-fixes/` files into the live Next.js repo + redeploy (SEO, headers,
+  analytics, JSON-LD).
+- Enable Supabase **leaked-password protection** (Auth settings — dashboard only;
+  no MCP tool for it).
+- Port blog posts onto live `/blog`; wire Stripe; submit sitemap to Search
+  Console; decide single product stack (Next.js vs Base44).
+
+### Current Supabase advisor state (19 June)
+- Security: 2 WARN — `is_admin` executable by authenticated (by design);
+  leaked-password protection disabled (enable in dashboard).
+- Performance: only INFO unused-index + 2 deliberate multiple-permissive policies.
+
+---
+
+## 2026-06-16: Base44 + Supabase hardening
+
 Date: 2026-06-16
 
 ## Context
