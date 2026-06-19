@@ -75,8 +75,8 @@ export function Navbar() {
           >
             Sign in
           </Link>
-          <Link href="/waitlist" className={cn(btnPrimary, sizeMd, "hidden sm:inline-flex")}>
-            Join waitlist
+          <Link href="/signup" className={cn(btnPrimary, sizeMd, "hidden sm:inline-flex")}>
+            Sign up
           </Link>
           <button
             type="button"
@@ -110,8 +110,8 @@ export function Navbar() {
             >
               Sign in
             </Link>
-            <Link href="/waitlist" onClick={() => setOpen(false)} className={cn(btnPrimary, sizeMd, "mt-2")}>
-              Join waitlist
+            <Link href="/signup" onClick={() => setOpen(false)} className={cn(btnPrimary, sizeMd, "mt-2")}>
+              Sign up
             </Link>
           </div>
         </div>

@@ -145,7 +145,7 @@ export default async function JobsPage({
                       Apply
                     </a>
                   )}
-                  <Link href="/waitlist" className={cn(btnOutline, sizeMd)}>
+                  <Link href="/signup" className={cn(btnOutline, sizeMd)}>
                     Save with GradPilot
                   </Link>
                 </div>
@@ -156,8 +156,8 @@ export default async function JobsPage({
 
         <p className="mt-12 text-center text-sm text-muted-foreground">
           Want CV coaching, application tracking, and personalised matches?{" "}
-          <Link href="/waitlist" className="text-primary underline">
-            Join the waitlist
+          <Link href="/signup" className="text-primary underline">
+            Create a free account
           </Link>
           .
         </p>

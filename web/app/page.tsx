@@ -41,8 +41,8 @@ export default function HomePage() {
                 international students.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/waitlist" className={cn(btnPrimary, sizeLg)}>
-                  Join the waitlist
+                <Link href="/signup" className={cn(btnPrimary, sizeLg)}>
+                  Get started free
                 </Link>
                 <Link href="/#how-it-works" className={cn(btnOutline, sizeLg)}>
                   See how it works
@@ -204,7 +204,7 @@ export default function HomePage() {
                     {plan.price !== "Free" && <span className="text-sm text-muted-foreground">/mo</span>}
                   </div>
                   <p className="text-xs text-muted-foreground">{plan.note}</p>
-                  <Link href="/waitlist" className={cn(btnPrimary, sizeLg, "mt-5 w-full")}>
+                  <Link href="/signup" className={cn(btnPrimary, sizeLg, "mt-5 w-full")}>
                     {plan.cta}
                   </Link>
                   <ul className="mt-6 space-y-2.5">
@@ -247,8 +247,8 @@ export default function HomePage() {
               international students who lived every part of this.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/waitlist" className={cn(btnPrimary, sizeLg)}>
-                Join the waitlist
+              <Link href="/signup" className={cn(btnPrimary, sizeLg)}>
+                Create your account
               </Link>
               <Link href="/about" className={cn(btnOutline, sizeLg)}>
                 Read our story
