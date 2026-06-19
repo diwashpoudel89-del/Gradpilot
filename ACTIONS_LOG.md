@@ -54,3 +54,32 @@ salary expectations, NHS registration). Blog now has 10 live posts.
 Base44 actively manages/re-syncs RLS on its tables (new `usage_tracking` write
 policies reappeared after migration 0001). Treat **Base44 as the source of truth**;
 direct Supabase schema changes to Base44-managed tables may not fully persist.
+
+## Update — Base44 content copied into Supabase (APPLIED)
+Date: 2026-06-16
+
+The live site (gradpilotai.com on Vercel) is backed by **Supabase**, whose content
+tables were empty. Copied all Base44 content into Supabase via migration
+`0003_seed_content_from_base44.sql` (145 rows, applied to live DB):
+
+- jobs: 30
+- employer_insights: 26
+- interview_questions: 36
+- blog_posts: 10
+- mentors: 10
+- testimonials: 8
+- site_content: 13
+- company_values: 5
+- team_members: 4 (incl. 3 "TBC" placeholders — from Base44)
+- announcements: 3
+
+Only previously-empty tables were seeded (no duplication of the pre-existing CMS rows:
+faqs, pricing_plans, platform_features, how_it_works_steps, pain_points, target_segments,
+uk_guidance_services, company_info).
+
+Field mapping: Base44 camelCase -> Supabase snake_case (e.g. currentRole -> current_position).
+User-owned data (the 5 Base44 accounts and their saved jobs/applications/CVs) was NOT
+migrated — those users do not exist in Supabase Auth; account migration is a separate task.
+
+NOTE: gradpilotai.com still has Vercel Deployment Protection ON (per owner's choice),
+so the populated content is visible via the protected/preview URL, not publicly yet.
