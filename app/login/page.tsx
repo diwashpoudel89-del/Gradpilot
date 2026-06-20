@@ -13,9 +13,13 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
+  const initialError =
+    error === "confirmation_failed"
+      ? "That confirmation link is invalid or has expired. Please request a new one."
+      : undefined;
   return (
     <>
       <Navbar />
@@ -25,7 +29,7 @@ export default async function LoginPage({
           Sign in to your GradPilot AI account.
         </p>
         <div className="mt-8">
-          <AuthForm mode="login" next={next} />
+          <AuthForm mode="login" next={next} initialError={initialError} />
         </div>
       </main>
       <Footer />
