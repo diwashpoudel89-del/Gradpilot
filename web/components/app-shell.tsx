@@ -9,6 +9,8 @@ import {
   Users,
   Sparkles,
   UserCog,
+  ShieldCheck,
+  Map as MapIcon,
   LogOut,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -20,6 +22,8 @@ const APP_NAV = [
   { href: "/app/applications", label: "Applications", icon: ClipboardList },
   { href: "/app/cv", label: "CV Coach", icon: FileText },
   { href: "/app/interview", label: "Interview", icon: MessageSquareText },
+  { href: "/app/gradshield", label: "GradShield", icon: ShieldCheck },
+  { href: "/app/gradpath", label: "GradPath", icon: MapIcon },
   { href: "/app/mentors", label: "Mentors", icon: Users },
   { href: "/adviser", label: "Adviser", icon: Sparkles },
   { href: "/app/profile", label: "Profile", icon: UserCog },
