@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { OrganizationJsonLd } from "@/components/structured-data";
+import { CookieConsent } from "@/components/cookie-consent";
+import { Analytics } from "@/components/analytics";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -59,7 +61,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </ThemeProvider>
         <OrganizationJsonLd />
+        <CookieConsent />
         <Analytics />
+        <VercelAnalytics />
         <SpeedInsights />
       </body>
     </html>

@@ -65,15 +65,31 @@ export async function POST(req: NextRequest) {
           params as unknown as Parameters<typeof client.messages.stream>[0]
         );
 
+        let full = "";
         for await (const event of run) {
           if (
             event.type === "content_block_delta" &&
             event.delta.type === "text_delta"
           ) {
+            full += event.delta.text;
             controller.enqueue(encoder.encode(event.delta.text));
           }
         }
         controller.close();
+
+        // Persist the conversation (best-effort, RLS-scoped to the user).
+        try {
+          const topic = clean[0]?.content.slice(0, 80) ?? "Career chat";
+          await supabase
+            .from("ai_conversations")
+            .insert({
+              user_id: user.id,
+              topic,
+              messages: [...clean, { role: "assistant", content: full }],
+            });
+        } catch {
+          /* best-effort */
+        }
       } catch (err) {
         controller.enqueue(
           encoder.encode(

@@ -11,6 +11,7 @@ import {
   UserCog,
   ShieldCheck,
   Map as MapIcon,
+  Settings,
   LogOut,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -27,6 +28,7 @@ const APP_NAV = [
   { href: "/app/mentors", label: "Mentors", icon: Users },
   { href: "/adviser", label: "Adviser", icon: Sparkles },
   { href: "/app/profile", label: "Profile", icon: UserCog },
+  { href: "/app/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell({ email, children }: { email?: string; children: React.ReactNode }) {
