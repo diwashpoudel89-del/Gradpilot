@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MODEL, anthropic } from "@/lib/anthropic";
+import { createSupabaseServerClient } from "@/lib/auth-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -68,7 +69,30 @@ export async function POST(req: NextRequest) {
       params as unknown as Parameters<typeof client.messages.create>[0]
     )) as unknown as { content: { type: string; text?: string }[] };
     const textBlock = message.content.find((b) => b.type === "text");
-    return NextResponse.json(JSON.parse(textBlock?.text ?? "{}"));
+    const parsed = JSON.parse(textBlock?.text ?? "{}");
+
+    // Persist the practice session for signed-in users (best-effort, RLS-scoped).
+    try {
+      const supabase = await createSupabaseServerClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from("interview_prep_sessions").insert({
+          user_id: user.id,
+          target_role: role || "General practice",
+          questions: [{ question, answer, ...parsed }],
+          overall_score: parsed.score ?? null,
+          ai_feedback_summary: parsed.feedback ?? null,
+          session_type: "single",
+          completed: true,
+        });
+      }
+    } catch {
+      // saving is best-effort
+    }
+
+    return NextResponse.json(parsed);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error("interview route error", err);
