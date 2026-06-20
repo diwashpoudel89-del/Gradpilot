@@ -5,6 +5,8 @@ import { createSupabaseServerClient } from "@/lib/auth-server";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const FREE_DAILY_LIMIT = 15;
+
 const SYSTEM = `You are GradPilot AI's interview coach for international students interviewing with UK graduate employers. Score the candidate's answer honestly against what UK graduate recruiters look for (structure, specificity, evidence, the STAR method where relevant, and commercial awareness). Give warm, concrete feedback and a strong model answer. Where relevant, add a tip specific to international candidates (e.g. handling visa/right-to-work questions confidently).`;
 
 const SCHEMA = {
@@ -19,6 +21,11 @@ const SCHEMA = {
   required: ["score", "feedback", "strengths", "improvements", "model_answer"],
   additionalProperties: false,
 } as const;
+
+function startOfDayISO() {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+}
 
 export async function POST(req: NextRequest) {
   const client = anthropic;
@@ -48,6 +55,41 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Require sign-in.
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json(
+      { error: "Please sign in to use interview prep.", requiresAuth: true },
+      { status: 401 }
+    );
+  }
+
+  // Free-tier daily limit.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .maybeSingle();
+  if ((profile?.plan ?? "free") === "free") {
+    const { count } = await supabase
+      .from("interview_prep_sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", startOfDayISO());
+    if ((count ?? 0) >= FREE_DAILY_LIMIT) {
+      return NextResponse.json(
+        {
+          error: `You've reached today's free practice limit (${FREE_DAILY_LIMIT}). Upgrade to Pro for unlimited.`,
+          limitReached: true,
+        },
+        { status: 429 }
+      );
+    }
+  }
+
   try {
     const params: Record<string, unknown> = {
       model: MODEL,
@@ -71,26 +113,15 @@ export async function POST(req: NextRequest) {
     const textBlock = message.content.find((b) => b.type === "text");
     const parsed = JSON.parse(textBlock?.text ?? "{}");
 
-    // Persist the practice session for signed-in users (best-effort, RLS-scoped).
-    try {
-      const supabase = await createSupabaseServerClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("interview_prep_sessions").insert({
-          user_id: user.id,
-          target_role: role || "General practice",
-          questions: [{ question, answer, ...parsed }],
-          overall_score: parsed.score ?? null,
-          ai_feedback_summary: parsed.feedback ?? null,
-          session_type: "single",
-          completed: true,
-        });
-      }
-    } catch {
-      // saving is best-effort
-    }
+    await supabase.from("interview_prep_sessions").insert({
+      user_id: user.id,
+      target_role: role || "General practice",
+      questions: [{ question, answer, ...parsed }],
+      overall_score: parsed.score ?? null,
+      ai_feedback_summary: parsed.feedback ?? null,
+      session_type: "single",
+      completed: true,
+    });
 
     return NextResponse.json(parsed);
   } catch (err) {

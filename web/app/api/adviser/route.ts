@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { ADVISER_SYSTEM, MODEL, anthropic } from "@/lib/anthropic";
+import { createSupabaseServerClient } from "@/lib/auth-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -35,6 +36,15 @@ export async function POST(req: NextRequest) {
 
   if (clean.length === 0) {
     return new Response("No message to respond to.", { status: 400 });
+  }
+
+  // Require sign-in — keeps the Opus 4.8 adviser from being used anonymously.
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return new Response("Please sign in to chat with the AI adviser.", { status: 401 });
   }
 
   const encoder = new TextEncoder();
