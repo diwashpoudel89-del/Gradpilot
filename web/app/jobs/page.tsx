@@ -4,7 +4,8 @@ import { Building2, MapPin, ShieldCheck } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { createServerSupabase } from "@/lib/supabase-server";
-import { btnOutline, btnPrimary, cn, sizeMd } from "@/lib/ui";
+import { SaveJobButton } from "@/components/save-job-button";
+import { btnPrimary, cn, sizeMd } from "@/lib/ui";
 
 export const metadata: Metadata = {
   title: "Visa-sponsoring jobs",
@@ -145,9 +146,7 @@ export default async function JobsPage({
                       Apply
                     </a>
                   )}
-                  <Link href="/signup" className={cn(btnOutline, sizeMd)}>
-                    Save with GradPilot
-                  </Link>
+                  <SaveJobButton jobId={job.id} title={job.title} company={job.company} />
                 </div>
               </div>
             ))}

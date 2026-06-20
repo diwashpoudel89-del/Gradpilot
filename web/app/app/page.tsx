@@ -1,9 +1,28 @@
 import Link from "next/link";
-import { Briefcase, Bookmark, MessageSquare, CalendarClock } from "lucide-react";
+import {
+  Briefcase,
+  Bookmark,
+  ClipboardList,
+  FileText,
+  MessageSquareText,
+  Users,
+  Sparkles,
+  CalendarClock,
+} from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/auth-server";
-import { btnPrimary, btnOutline, cn, sizeMd } from "@/lib/ui";
+import { btnPrimary, cn, sizeMd } from "@/lib/ui";
 
 export const dynamic = "force-dynamic";
+
+const TOOLS = [
+  { href: "/jobs", title: "Visa-sponsoring jobs", body: "Roles tagged by sponsorship.", icon: Briefcase },
+  { href: "/app/saved", title: "Saved jobs", body: "Your shortlist.", icon: Bookmark },
+  { href: "/app/applications", title: "Application tracker", body: "Applied → offer.", icon: ClipboardList },
+  { href: "/app/cv", title: "AI CV Coach", body: "Score, rewrite, cover letter.", icon: FileText },
+  { href: "/app/interview", title: "Interview prep", body: "Scored AI practice.", icon: MessageSquareText },
+  { href: "/app/mentors", title: "Mentors", body: "Alumni who made it.", icon: Users },
+  { href: "/adviser", title: "AI Career Adviser", body: "Ask anything, 24/7.", icon: Sparkles },
+];
 
 function daysUntil(date: string | null): number | null {
   if (!date) return null;
@@ -52,7 +71,10 @@ export default async function DashboardPage() {
             </>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground">
-              Add your visa expiry date to start your countdown (profile editor coming soon).
+              <Link href="/app/profile" className="text-primary underline">
+                Add your visa expiry date
+              </Link>{" "}
+              to start your countdown.
             </p>
           )}
         </div>
@@ -75,26 +97,30 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <h2 className="mt-10 font-display text-xl font-semibold">Get started</h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft">
-          <h3 className="font-display text-lg font-semibold">Find visa-sponsoring jobs</h3>
-          <p className="mt-2 flex-1 text-sm text-muted-foreground">
-            Browse roles tagged by Graduate Route and Skilled Worker sponsorship.
-          </p>
-          <Link href="/jobs" className={cn(btnPrimary, sizeMd, "mt-4 self-start")}>
-            Browse jobs
+      <h2 className="mt-10 font-display text-xl font-semibold">Your toolkit</h2>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {TOOLS.map((t) => (
+          <Link
+            key={t.href}
+            href={t.href}
+            className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-soft transition-colors hover:border-primary"
+          >
+            <t.icon className="size-5 text-primary" />
+            <h3 className="mt-3 font-display text-base font-semibold">{t.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t.body}</p>
           </Link>
-        </div>
-        <div className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft">
-          <h3 className="font-display text-lg font-semibold">Ask the AI career adviser</h3>
-          <p className="mt-2 flex-1 text-sm text-muted-foreground">
-            Get honest, UK-specific guidance on visas, CVs, and interviews — powered by Claude Opus 4.8.
-          </p>
-          <Link href="/adviser" className={cn(btnOutline, sizeMd, "mt-4 self-start")}>
-            <MessageSquare className="size-4" /> Open adviser
-          </Link>
-        </div>
+        ))}
+      </div>
+
+      <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-soft">
+        <h3 className="font-display text-lg font-semibold">Finish your profile</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Add your visa timeline, degree, and target roles to unlock your Graduate Route countdown and
+          sharper AI guidance.
+        </p>
+        <Link href="/app/profile" className={cn(btnPrimary, sizeMd, "mt-4 self-start")}>
+          Complete profile
+        </Link>
       </div>
     </div>
   );
