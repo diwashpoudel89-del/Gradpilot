@@ -19,6 +19,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [info, setInfo] = useState("");
   const [confirmationEmail, setConfirmationEmail] = useState("");
 
+  async function sendPasswordReset() {
+    const input = document.querySelector<HTMLInputElement>('#email');
+    const email = input?.value.trim().toLowerCase() ?? "";
+    if (!email) {
+      setError("Enter your email address first, then request a password reset.");
+      return;
+    }
+
+    setStatus("loading");
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
+    });
+    if (error) {
+      setError(error.message);
+    } else {
+      setInfo("Password reset email sent. Check your inbox and spam folder.");
+    }
+    setStatus("idle");
+  }
+
   function confirmationRedirect() {
     const callback = new URL("/auth/callback", window.location.origin);
     callback.searchParams.set("next", next);
@@ -118,6 +140,16 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium">Password</label>
           <input id="password" name="password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={6} className="h-11 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200" placeholder="••••••••" />
         </div>
+        {mode === "login" && (
+          <button
+            type="button"
+            onClick={sendPasswordReset}
+            disabled={status === "loading"}
+            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+          >
+            Forgot your password?
+          </button>
+        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
         {info && <p className="text-sm text-emerald-600">{info}</p>}
         {confirmationEmail && (
