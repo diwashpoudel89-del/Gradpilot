@@ -8,10 +8,40 @@ import { createClient } from "@/lib/supabase/client";
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/dashboard";
+  const requestedNext = params.get("next");
+  const next = requestedNext?.startsWith("/") ? requestedNext : "/dashboard";
   const [status, setStatus] = useState<"idle" | "loading">("idle");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    params.get("error") === "confirmation_failed"
+      ? "That confirmation link is invalid or has expired. Please request a new one."
+      : ""
+  );
   const [info, setInfo] = useState("");
+  const [confirmationEmail, setConfirmationEmail] = useState("");
+
+  function confirmationRedirect() {
+    const callback = new URL("/auth/callback", window.location.origin);
+    callback.searchParams.set("next", next);
+    return callback.toString();
+  }
+
+  async function resendConfirmation() {
+    if (!confirmationEmail) return;
+    setStatus("loading");
+    setError("");
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: confirmationEmail,
+      options: { emailRedirectTo: confirmationRedirect() },
+    });
+    if (error) {
+      setError(error.message);
+    } else {
+      setInfo("We sent a fresh confirmation link. Check your inbox and spam folder.");
+    }
+    setStatus("idle");
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,33 +49,42 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     setInfo("");
     setStatus("loading");
     const form = new FormData(e.currentTarget);
-    const email = String(form.get("email") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim().toLowerCase();
     const password = String(form.get("password") ?? "");
     const fullName = String(form.get("fullName") ?? "").trim();
     const supabase = createClient();
 
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: { full_name: fullName },
-            emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+            emailRedirectTo: confirmationRedirect(),
           },
         });
         if (error) throw error;
-        const { data } = await supabase.auth.getSession();
         if (data.session) {
           router.push(next);
           router.refresh();
         } else {
-          setInfo("Check your email to confirm your account, then sign in.");
+          setConfirmationEmail(email);
+          setInfo("Check your email to confirm your account. The link will sign you in automatically.");
           setStatus("idle");
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          if (error.message.toLowerCase().includes("email not confirmed")) {
+            setConfirmationEmail(email);
+            throw new Error("Please confirm your email before signing in.");
+          }
+          if (error.message.toLowerCase().includes("invalid login credentials")) {
+            throw new Error("The email or password is incorrect.");
+          }
+          throw error;
+        }
         router.push(next);
         router.refresh();
       }
@@ -81,6 +120,16 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {info && <p className="text-sm text-emerald-600">{info}</p>}
+        {confirmationEmail && (
+          <button
+            type="button"
+            disabled={status === "loading"}
+            onClick={resendConfirmation}
+            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+          >
+            Resend confirmation email
+          </button>
+        )}
         <button type="submit" disabled={status === "loading"} className="btn-primary h-12 w-full px-7 text-sm">
           {status === "loading" ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
         </button>
