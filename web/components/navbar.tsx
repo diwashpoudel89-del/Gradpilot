@@ -8,11 +8,11 @@ import { Logo } from "./logo";
 import { btnPrimary, cn, sizeMd } from "@/lib/ui";
 
 const NAV_LINKS = [
+  { href: "/tools", label: "AI Tools" },
   { href: "/jobs", label: "Jobs" },
   { href: "/adviser", label: "AI Adviser" },
-  { href: "/#how-it-works", label: "How it works" },
+  { href: "/resources", label: "Resources" },
   { href: "/#pricing", label: "Pricing" },
-  { href: "/#faq", label: "FAQ" },
 ];
 
 function ThemeToggle() {

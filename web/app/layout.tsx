@@ -18,11 +18,11 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.gradpilotai.co
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "GradPilot AI — The career co-pilot for international students in the UK",
+    default: "GradPilot AI — The AI Operating System for International Students",
     template: "%s · GradPilot AI",
   },
   description:
-    "GradPilot AI helps international students and graduates in the UK find visa-sponsoring jobs, sharpen their CV, prepare for interviews, and navigate the Graduate Route — all in one place.",
+    "GradPilot AI helps international students find visa-sponsored jobs, improve their CV, prepare for interviews, avoid scams, and build a career in the UK — powered by AI.",
   keywords: [
     "international students UK",
     "Graduate Route visa",

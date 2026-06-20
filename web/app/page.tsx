@@ -1,11 +1,23 @@
 import Link from "next/link";
-import { Check } from "lucide-react";
+import {
+  Check,
+  FileText,
+  MessagesSquare,
+  Briefcase,
+  Gauge,
+  ShieldCheck,
+  Map,
+  PlayCircle,
+  Star,
+} from "lucide-react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { Faq } from "@/components/sections/faq";
 import { FaqJsonLd, ProductJsonLd } from "@/components/structured-data";
 import { btnOutline, btnPrimary, cn, sizeLg } from "@/lib/ui";
-import { FAQS, FEATURES, PLANS, PROBLEMS, SEGMENTS, STEPS } from "@/lib/content";
+import { BRAND, FAQS, FEATURES, PLANS, PROBLEMS, SEGMENTS, STEPS } from "@/lib/content";
+
+const FEATURE_ICONS = [FileText, MessagesSquare, Briefcase, Gauge, ShieldCheck, Map];
 
 function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
   return (
@@ -17,6 +29,23 @@ function SectionHeading({ eyebrow, title, sub }: { eyebrow: string; title: strin
   );
 }
 
+function ScoreBar({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className="font-semibold">{value}</span>
+      </div>
+      <div className="mt-1 h-2 overflow-hidden rounded-full bg-secondary">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-brand-400 to-brand-700"
+          style={{ width: `${value}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -24,62 +53,80 @@ export default function HomePage() {
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:items-center lg:gap-8 lg:px-8">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 -top-40 -z-10 mx-auto h-[480px] max-w-5xl rounded-full bg-brand-50 blur-3xl opacity-60"
+          />
+          <div className="mx-auto grid w-full max-w-6xl gap-12 px-5 py-16 sm:px-6 sm:py-24 lg:grid-cols-2 lg:items-center lg:gap-10 lg:px-8">
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground">
                 <span className="rounded-full bg-primary px-2 py-0.5 text-[0.65rem] font-semibold text-primary-foreground">
                   New
                 </span>
-                Pre-launch · Join the waitlist
+                {BRAND.tagline}
               </span>
-              <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-                Your career co-pilot for the UK for international students
+              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">
+                {BRAND.heroTitle}
               </h1>
-              <p className="mt-5 text-lg text-muted-foreground">
-                Find visa-sponsoring jobs, fix your CV for UK employers, prep for interviews, and
-                stay ahead of your Graduate Route deadline — all in one place, built only for
-                international students.
-              </p>
+              <p className="mt-5 max-w-xl text-lg text-muted-foreground">{BRAND.heroSubtitle}</p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link href="/signup" className={cn(btnPrimary, sizeLg)}>
-                  Get started free
+                  Get Started Free
                 </Link>
                 <Link href="/#how-it-works" className={cn(btnOutline, sizeLg)}>
-                  See how it works
+                  <PlayCircle className="size-5" /> Watch Demo
                 </Link>
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">
-                Free to join · Early members get 3 months of Pro free at launch.
-              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <Check className="size-4 text-primary" /> Free to start
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Check className="size-4 text-primary" /> No card required
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Star className="size-4 text-primary" /> Built for international students
+                </span>
+              </div>
             </div>
 
-            <div className="rounded-3xl border border-border bg-card/70 p-6 shadow-soft backdrop-blur">
-              <div className="rounded-2xl border border-border bg-background p-4">
-                <p className="text-xs font-medium text-muted-foreground">Graduate Route</p>
-                <div className="mt-1 flex items-baseline justify-between">
-                  <span className="font-display text-lg font-bold text-primary">On track</span>
-                  <span className="text-sm font-semibold">312 days left</span>
+            {/* GradScore dashboard mockup */}
+            <div className="relative">
+              <div className="rounded-3xl border border-border bg-card/80 p-6 shadow-lift backdrop-blur">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground">Your GradScore™</p>
+                    <p className="font-display text-4xl font-extrabold text-gradient">78</p>
+                  </div>
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                    On track
+                  </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Sample timeline · GradPilot tracks this automatically from your visa date.
-                </p>
+
+                <div className="mt-5 space-y-3">
+                  <ScoreBar label="Employability" value={82} />
+                  <ScoreBar label="Sponsorship readiness" value={71} />
+                  <ScoreBar label="Career readiness" value={80} />
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-border bg-background p-4">
+                    <p className="text-xs text-muted-foreground">Top job match · Sponsors</p>
+                    <p className="mt-1 text-sm font-semibold">Graduate Software Engineer</p>
+                    <p className="text-xs text-muted-foreground">London · £45,000</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-background p-4">
+                    <p className="text-xs text-muted-foreground">CV (ATS)</p>
+                    <p className="mt-1 font-display text-3xl font-bold text-gradient">A−</p>
+                    <p className="text-xs text-muted-foreground">2 fixes suggested</p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-2xl bg-secondary/60 p-3 text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">GradPath™ next step:</span> Apply to 3
+                  sponsoring employers this week and practise 2 interview questions.
+                </div>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-border bg-background p-4">
-                  <p className="text-xs font-medium text-muted-foreground">Job match · Sponsors</p>
-                  <p className="mt-1 text-sm font-semibold">Graduate Software Engineer</p>
-                  <p className="text-xs text-muted-foreground">London · £45,000</p>
-                </div>
-                <div className="rounded-2xl border border-border bg-background p-4">
-                  <p className="text-xs font-medium text-muted-foreground">CV score</p>
-                  <p className="mt-1 font-display text-3xl font-bold text-gradient">82</p>
-                  <p className="text-xs text-muted-foreground">UK-ready</p>
-                </div>
-              </div>
-              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                2 years to work in the UK on the Graduate Route · 3 years for PhD graduates · any
-                employer, no sponsorship needed while it's active.
-              </p>
             </div>
           </div>
         </section>
@@ -89,8 +136,8 @@ export default function HomePage() {
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8">
             <SectionHeading
               eyebrow="The problem"
-              title="Job-hunting in the UK is a different game for international students"
-              sub="You're not lacking talent — you're missing a system built for your situation. These are the three things that quietly cost graduates their best opportunities."
+              title="The UK job hunt is a different game for international students"
+              sub="You're not lacking talent — you're missing a system built for your situation."
             />
             <div className="mt-12 grid gap-6 md:grid-cols-3">
               {PROBLEMS.map((p) => (
@@ -103,42 +150,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Features */}
-        <section id="features" className="py-16 sm:py-24">
-          <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8">
-            <SectionHeading
-              eyebrow="The platform"
-              title="Everything you need, in one co-pilot"
-              sub="Seven tools that work together — from finding visa-sponsoring roles to walking into the interview prepared."
-            />
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display text-base font-semibold">{f.title}</h3>
-                    {f.tag && (
-                      <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[0.65rem] font-semibold text-primary">
-                        {f.tag}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm font-medium">{f.lead}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how-it-works" className="bg-secondary/40 py-16 sm:py-24">
+        {/* How it works — 6 steps */}
+        <section id="how-it-works" className="py-16 sm:py-24">
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8">
             <SectionHeading
               eyebrow="How it works"
-              title="From overwhelmed to hired, in four steps"
-              sub="No lengthy forms or generic advice — a clear path built around your visa timeline."
+              title="From overwhelmed to hired, in six steps"
+              sub="A clear path built around your visa timeline — no lengthy forms, no generic advice."
             />
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {STEPS.map((s) => (
                 <div key={s.n} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
                   <span className="inline-flex size-9 items-center justify-center rounded-full bg-primary font-display font-bold text-primary-foreground">
@@ -152,13 +172,54 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Core features — 6 cards */}
+        <section id="features" className="bg-secondary/40 py-16 sm:py-24">
+          <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8">
+            <SectionHeading
+              eyebrow="The platform"
+              title="One operating system for your whole journey"
+              sub="Six AI-powered tools that work together — from finding sponsorship to staying safe while you relocate."
+            />
+            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {FEATURES.map((f, i) => {
+                const Icon = FEATURE_ICONS[i] ?? FileText;
+                return (
+                  <div key={f.name} className="flex flex-col rounded-2xl border border-border bg-card p-6 shadow-soft">
+                    <span className="inline-flex size-11 items-center justify-center rounded-2xl bg-brand-50 text-primary">
+                      <Icon className="size-5" />
+                    </span>
+                    <h3 className="mt-4 font-display text-lg font-semibold">
+                      {f.name}
+                      {f.trademark && <span className="align-super text-xs">{f.trademark}</span>}
+                    </h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{f.tagline}</p>
+                    <ul className="mt-4 space-y-2">
+                      {f.bullets.map((b) => (
+                        <li key={b} className="flex items-start gap-2 text-sm">
+                          <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+                          <span className="text-muted-foreground">{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-10 text-center">
+              <Link href="/tools" className={cn(btnOutline, sizeLg)}>
+                Explore all AI tools
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Who it's for */}
         <section id="who-its-for" className="py-16 sm:py-24">
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-6 lg:px-8">
             <SectionHeading
               eyebrow="Who it's for"
               title="Built for your stage of the journey"
-              sub="Wherever you are on the Graduate Route, GradPilot meets you there — with guidance tuned to your situation."
+              sub="Wherever you are on the Graduate Route, GradPilot meets you there."
             />
             <div className="mt-12 grid gap-6 md:grid-cols-2">
               {SEGMENTS.map((s) => (
@@ -181,7 +242,7 @@ export default function HomePage() {
             <SectionHeading
               eyebrow="Pricing"
               title="Simple pricing that grows with you"
-              sub="Start free, forever. Upgrade only when you need unlimited AI and the full toolkit. Cancel anytime."
+              sub="Start free, forever. Upgrade only when you need unlimited AI and the full toolkit."
             />
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
               {PLANS.map((plan) => (
@@ -218,9 +279,6 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              Early waitlist members get 3 months of Pro free at launch.
-            </p>
           </div>
         </section>
 
@@ -230,7 +288,7 @@ export default function HomePage() {
             <SectionHeading
               eyebrow="FAQ"
               title="Questions, answered"
-              sub="Everything you need to know about the Graduate Route and how GradPilot helps."
+              sub="Everything you need to know about GradPilot AI and the Graduate Route."
             />
             <Faq />
           </div>
@@ -240,21 +298,20 @@ export default function HomePage() {
         <section className="bg-secondary/40 py-16 sm:py-24">
           <div className="mx-auto w-full max-w-3xl px-5 text-center sm:px-6 lg:px-8">
             <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              Your Graduate Route clock is ticking. Get a head start.
+              Your career, on autopilot. Start free today.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Join the waitlist today and lock in 3 months of Pro free at launch. Built by
-              international students who lived every part of this.
+              Join international students using GradPilot AI to find sponsorship, fix their CV, and land
+              the offer — built by people who lived every part of this.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href="/signup" className={cn(btnPrimary, sizeLg)}>
-                Create your account
+                Get Started Free
               </Link>
-              <Link href="/about" className={cn(btnOutline, sizeLg)}>
+              <Link href="/founder" className={cn(btnOutline, sizeLg)}>
                 Read our story
               </Link>
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">— Diwash Poudel, Founder &amp; CEO</p>
           </div>
         </section>
       </main>

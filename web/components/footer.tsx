@@ -5,18 +5,19 @@ const COLUMNS = [
   {
     title: "Product",
     links: [
-      { href: "/#features", label: "Features" },
-      { href: "/#how-it-works", label: "How it works" },
+      { href: "/tools", label: "AI Tools" },
+      { href: "/jobs", label: "Sponsorship Jobs" },
       { href: "/#pricing", label: "Pricing" },
-      { href: "/waitlist", label: "Join waitlist" },
+      { href: "/signup", label: "Get started" },
     ],
   },
   {
     title: "Company",
     links: [
-      { href: "/about", label: "About" },
-      { href: "/blog", label: "Blog" },
-      { href: "mailto:hello@gradpilotai.com", label: "Contact" },
+      { href: "/founder", label: "Founder Story" },
+      { href: "/success", label: "Success Stories" },
+      { href: "/resources", label: "Resources" },
+      { href: "/contact", label: "Contact" },
     ],
   },
   {
