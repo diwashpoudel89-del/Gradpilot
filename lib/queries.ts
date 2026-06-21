@@ -8,6 +8,9 @@ import type {
   Testimonial,
   Faq,
   PricingPlan,
+  SavedJob,
+  Application,
+  Profile,
 } from "@/lib/types";
 
 // Every fetcher fails soft: on missing config or any error it returns an empty
@@ -105,5 +108,43 @@ export function getPricingPlans(): Promise<PricingPlan[]> {
   return safe(async (db) => {
     const { data } = await db.from("pricing_plans").select("*").order("display_order");
     return (data ?? []) as PricingPlan[];
+  }, []);
+}
+
+// ---- User-scoped data (RLS restricts every row to the signed-in user) ----
+
+export function getSavedJobs(userId: string): Promise<SavedJob[]> {
+  return safe(async (db) => {
+    const { data } = await db
+      .from("saved_jobs")
+      .select("*")
+      .eq("user_id", userId)
+      .order("saved_at", { ascending: false });
+    return (data ?? []) as SavedJob[];
+  }, []);
+}
+
+export function getApplications(userId: string): Promise<Application[]> {
+  return safe(async (db) => {
+    const { data } = await db
+      .from("applications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("updated_at", { ascending: false });
+    return (data ?? []) as Application[];
+  }, []);
+}
+
+export function getProfile(userId: string): Promise<Profile | null> {
+  return safe(async (db) => {
+    const { data } = await db.from("profiles").select("*").eq("id", userId).maybeSingle();
+    return (data ?? null) as Profile | null;
+  }, null);
+}
+
+export function getSavedJobIds(userId: string): Promise<string[]> {
+  return safe(async (db) => {
+    const { data } = await db.from("saved_jobs").select("job_id").eq("user_id", userId);
+    return (data ?? []).map((r: { job_id: string | null }) => r.job_id).filter((x): x is string => !!x);
   }, []);
 }

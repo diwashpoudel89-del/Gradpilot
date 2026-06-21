@@ -96,3 +96,68 @@ export type PricingPlan = {
   cta_text: string | null;
   tagline: string | null;
 };
+
+export const APPLICATION_STATUSES = [
+  "saved",
+  "applied",
+  "interview_scheduled",
+  "offer_received",
+  "rejected",
+  "withdrawn",
+] as const;
+
+export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
+
+export const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  saved: "Saved",
+  applied: "Applied",
+  interview_scheduled: "Interview",
+  offer_received: "Offer",
+  rejected: "Rejected",
+  withdrawn: "Withdrawn",
+};
+
+export type SavedJob = {
+  id: string;
+  user_id: string;
+  job_id: string | null;
+  job_title: string | null;
+  company: string | null;
+  notes: string | null;
+  saved_at: string | null;
+};
+
+export type Application = {
+  id: string;
+  user_id: string;
+  job_id: string | null;
+  job_title: string;
+  company: string;
+  status: ApplicationStatus | null;
+  applied_at: string | null;
+  interview_date: string | null;
+  notes: string | null;
+  next_action: string | null;
+  next_action_due: string | null;
+  sponsorship_status: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Profile = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  university: string | null;
+  degree_level: string | null;
+  degree_subject: string | null;
+  country_of_origin: string | null;
+  visa_type: string | null;
+  visa_expiry_date: string | null;
+  graduation_date: string | null;
+  target_industry: string | null;
+  target_roles: string[] | null;
+  linkedin_url: string | null;
+  plan: string;
+  onboarding_completed: boolean;
+};

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getJob } from "@/lib/queries";
+import { createClient } from "@/lib/supabase/server";
+import { SaveJobButton } from "@/components/save-job-button";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,20 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   const { id } = await params;
   const job = await getJob(id);
   if (!job) notFound();
+
+  // Auth + saved state for the Save button (RLS scopes the lookup to this user).
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  let initialSaved = false;
+  if (auth.user) {
+    const { data: saved } = await supabase
+      .from("saved_jobs")
+      .select("id")
+      .eq("user_id", auth.user.id)
+      .eq("job_id", job.id)
+      .maybeSingle();
+    initialSaved = !!saved;
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -95,7 +111,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             ) : (
               <Link href="/signup" className="btn-primary h-11 w-full px-5 text-sm">Sign up to apply</Link>
             )}
-            <Link href="/signup" className="btn-outline h-11 w-full px-5 text-sm">Save &amp; track this job</Link>
+            <SaveJobButton
+              jobId={job.id}
+              jobTitle={job.title}
+              company={job.company}
+              initialSaved={initialSaved}
+              isAuthed={!!auth.user}
+            />
           </div>
         </aside>
       </div>
