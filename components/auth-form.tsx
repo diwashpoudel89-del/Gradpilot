@@ -9,8 +9,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
+  const urlError = params.get("error");
   const [status, setStatus] = useState<"idle" | "loading">("idle");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(
+    urlError === "auth" ? "We couldn't confirm that link. Please sign in again." : ""
+  );
   const [info, setInfo] = useState("");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -77,7 +80,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </div>
         <div>
           <label htmlFor="password" className="mb-1.5 block text-sm font-medium">Password</label>
-          <input id="password" name="password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={6} className="h-11 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200" placeholder="••••••••" />
+          <input id="password" name="password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} className="h-11 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200" placeholder="••••••••" />
+          {mode === "signup" && <p className="mt-1.5 text-xs text-slate-500">Use at least 8 characters.</p>}
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {info && <p className="text-sm text-emerald-600">{info}</p>}

@@ -4,7 +4,7 @@ import { getBlogPosts } from "@/lib/queries";
 const BASE = "https://gradpilotai.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticRoutes = ["", "/jobs", "/employer-insights", "/mentors", "/blog", "/pricing", "/about", "/faq", "/waitlist"].map(
+  const staticRoutes = ["", "/jobs", "/employer-insights", "/mentors", "/blog", "/pricing", "/about", "/faq", "/waitlist", "/privacy", "/terms"].map(
     (path) => ({ url: `${BASE}${path}`, lastModified: new Date() })
   );
 

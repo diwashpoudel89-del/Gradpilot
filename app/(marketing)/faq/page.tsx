@@ -6,8 +6,20 @@ export const metadata: Metadata = { title: "FAQ", description: "Common questions
 
 export default async function FaqPage() {
   const faqs = await getFaqs();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
   return (
     <div className="container-x py-12">
+      {faqs.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      )}
       <header className="mx-auto max-w-2xl text-center">
         <h1 className="font-display text-3xl font-bold tracking-tight">Frequently asked questions</h1>
       </header>

@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     "CV for UK jobs",
     "graduate jobs UK",
   ],
+  alternates: { canonical: "/" },
   openGraph: {
     title: "GradPilot AI — The career co-pilot for international students in the UK",
     description:
@@ -26,6 +27,13 @@ export const metadata: Metadata = {
     locale: "en_GB",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "GradPilot AI — The career co-pilot for international students in the UK",
+    description:
+      "Find visa-sponsoring jobs, fix your CV, ace interviews, and stay ahead of your Graduate Route deadline.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

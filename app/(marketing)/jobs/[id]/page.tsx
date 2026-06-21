@@ -1,16 +1,44 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { getJob } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const job = await getJob(id);
+  if (!job) return { title: "Job not found" };
+  const sponsors = job.sponsors_graduate_route || job.sponsors_skilled_worker;
+  return {
+    title: `${job.title} at ${job.company}`,
+    description: `${job.title} at ${job.company}${job.location ? ` in ${job.location}` : ""}.${sponsors ? " Visa sponsorship available." : ""} Apply via GradPilot AI.`,
+    alternates: { canonical: `/jobs/${id}` },
+  };
+}
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const job = await getJob(id);
   if (!job) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title,
+    description: job.description ?? job.requirements ?? job.title,
+    hiringOrganization: { "@type": "Organization", name: job.company },
+    ...(job.location ? { jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: job.location, addressCountry: "GB" } } } : {}),
+    ...(job.deadline ? { validThrough: job.deadline } : {}),
+    ...(job.industry ? { industry: job.industry } : {}),
+    ...(job.job_type ? { employmentType: job.job_type.toUpperCase().replace(/[\s-]/g, "_") } : {}),
+    ...(job.salary_min ? { baseSalary: { "@type": "MonetaryAmount", currency: "GBP", value: { "@type": "QuantitativeValue", minValue: job.salary_min, maxValue: job.salary_max ?? job.salary_min, unitText: "YEAR" } } } : {}),
+    directApply: !job.application_url,
+  };
+
   return (
     <div className="container-x py-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Link href="/jobs" className="text-sm font-medium text-brand-600 hover:underline">← All jobs</Link>
       <div className="mt-4 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">

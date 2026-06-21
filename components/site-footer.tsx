@@ -38,9 +38,13 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-slate-200">
-        <div className="container-x flex flex-col items-center justify-between gap-2 py-5 text-xs text-slate-500 sm:flex-row">
+        <div className="container-x flex flex-col items-center justify-between gap-3 py-5 text-xs text-slate-500 sm:flex-row">
           <p>© 2026 GradPilot AI Ltd. All rights reserved.</p>
-          <p>Built by international students, for international students.</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-slate-900">Privacy</Link>
+            <Link href="/terms" className="hover:text-slate-900">Terms</Link>
+            <span className="hidden sm:inline">Built by international students, for international students.</span>
+          </div>
         </div>
       </div>
     </footer>

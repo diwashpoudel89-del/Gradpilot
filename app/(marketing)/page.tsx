@@ -5,11 +5,11 @@ export const dynamic = "force-dynamic";
 
 const FEATURES = [
   { icon: "🎯", title: "Visa-aware job board", body: "Every role flagged for Graduate Route and Skilled Worker sponsorship, so you never waste an application." },
-  { icon: "📄", title: "AI CV coach", body: "Get your CV scored and rewritten for UK employers and ATS — in under a minute." },
-  { icon: "💬", title: "AI career adviser", body: "Plain-English answers on visas, applications, and switching to Skilled Worker." },
-  { icon: "🎤", title: "Interview prep", body: "Practice real questions with feedback tailored to international candidates." },
   { icon: "🧭", title: "Employer insights", body: "Know which employers truly sponsor, their timelines, and insider tips before you apply." },
   { icon: "🤝", title: "Mentors", body: "Learn from people who made the exact journey you're on — country to career." },
+  { icon: "📄", title: "AI CV coach", body: "Get your CV scored and rewritten for UK employers and ATS — in under a minute.", soon: true },
+  { icon: "💬", title: "AI career adviser", body: "Plain-English answers on visas, applications, and switching to Skilled Worker.", soon: true },
+  { icon: "🎤", title: "Interview prep", body: "Practice real questions with feedback tailored to international candidates.", soon: true },
 ];
 
 export default async function HomePage() {
@@ -49,7 +49,10 @@ export default async function HomePage() {
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((f) => (
             <div key={f.title} className="card p-6">
-              <div className="text-3xl">{f.icon}</div>
+              <div className="flex items-start justify-between">
+                <div className="text-3xl">{f.icon}</div>
+                {f.soon && <span className="badge bg-amber-100 text-amber-700">Coming soon</span>}
+              </div>
               <h3 className="mt-4 font-semibold text-slate-900">{f.title}</h3>
               <p className="mt-2 text-sm text-slate-600">{f.body}</p>
             </div>
