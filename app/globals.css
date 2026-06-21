@@ -48,3 +48,63 @@ body {
     @apply bg-gradient-to-r from-brand-500 to-accent bg-clip-text text-transparent;
   }
 }
+
+/* ---- Interactive 3D hero ---------------------------------------------- */
+.scene {
+  perspective: 1200px;
+}
+.tilt {
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.layer {
+  transform: translateZ(var(--z, 0px));
+  transform-style: preserve-3d;
+}
+
+/* Animated aurora background blobs */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.55;
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+@keyframes aurora {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(24px, -28px, 0) scale(1.12); }
+  100% { transform: translate3d(-20px, 18px, 0) scale(0.95); }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.floaty { animation: floaty 6s ease-in-out infinite; }
+.floaty-slow { animation: floaty 9s ease-in-out infinite; }
+
+/* Entrance reveal */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: riseIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.15s; }
+.rise-3 { animation-delay: 0.25s; }
+.rise-4 { animation-delay: 0.35s; }
+
+/* Bar fill animation */
+@keyframes growW {
+  from { width: 0; }
+}
+.bar-fill { animation: growW 1.1s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: 0.4s; }
+
+/* Respect reduced-motion: no transforms, no animation */
+@media (prefers-reduced-motion: reduce) {
+  .tilt { transition: none; transform: none; }
+  .aurora, .floaty, .floaty-slow, .rise, .bar-fill { animation: none; }
+  .rise { opacity: 1; transform: none; }
+}
+

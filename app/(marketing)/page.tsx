@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTestimonials, getJobs } from "@/lib/queries";
+import { InteractiveHero } from "@/components/interactive-hero";
 
 export const dynamic = "force-dynamic";
 
@@ -18,27 +19,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-600 text-white">
-        <div className="container-x py-20 sm:py-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="badge bg-white/15 text-white">For international students in the UK 🇬🇧</span>
-            <h1 className="mt-5 font-display text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
-              Land the right UK job — <span className="text-accent">before your visa clock runs out.</span>
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-white/80">
-              Visa-aware job matching, AI CV coaching, interview prep and Graduate Route guidance — built for international students, all in one place.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/signup" className="btn-primary h-12 px-7 text-base">Get started free</Link>
-              <Link href="/jobs" className="btn h-12 border border-white/30 bg-white/10 px-7 text-base text-white hover:bg-white/20">
-                Browse {jobCount > 0 ? `${jobCount} ` : ""}jobs
-              </Link>
-            </div>
-            <p className="mt-4 text-sm text-white/60">No credit card required · 3 months of Pro free for early members</p>
-          </div>
-        </div>
-      </section>
+      {/* Hero — interactive 3D */}
+      <InteractiveHero jobCount={jobCount} />
 
       {/* Features */}
       <section className="container-x py-20">
