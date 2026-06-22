@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { APPLICATION_STATUSES, type ApplicationStatus } from "@/lib/types";
 
@@ -141,4 +142,23 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/profile");
+}
+
+// ---- Onboarding ----
+
+// Save the profile from the onboarding form and send the user into the app.
+export async function completeOnboarding(formData: FormData) {
+  await updateProfile(formData); // writes fields + sets onboarding_completed = true
+  redirect("/dashboard");
+}
+
+// Let the user skip for now without being nagged again.
+export async function skipOnboarding() {
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("profiles")
+    .update({ onboarding_completed: true, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }

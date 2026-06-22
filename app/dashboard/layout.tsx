@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/env";
+import { getProfile } from "@/lib/queries";
 import { Logo } from "@/components/brand";
 import { DashboardNav } from "@/components/dashboard-nav";
 
@@ -12,6 +13,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) redirect("/login");
+
+  // New users complete their profile first.
+  const profile = await getProfile(data.user.id);
+  if (!profile?.onboarding_completed) redirect("/onboarding");
 
   return (
     <div className="min-h-dvh bg-slate-50">
