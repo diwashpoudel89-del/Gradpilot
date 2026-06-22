@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand";
-import { createClient } from "@/lib/supabase/server";
-import { supabaseConfigured } from "@/lib/env";
+import { HeaderAuthCta } from "@/components/header-auth-cta";
 
 const NAV = [
   { href: "/jobs", label: "Jobs" },
@@ -11,18 +10,7 @@ const NAV = [
   { href: "/pricing", label: "Pricing" },
 ];
 
-export async function SiteHeader() {
-  let signedIn = false;
-  if (supabaseConfigured) {
-    try {
-      const db = await createClient();
-      const { data } = await db.auth.getUser();
-      signedIn = Boolean(data.user);
-    } catch {
-      signedIn = false;
-    }
-  }
-
+export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/80 backdrop-blur">
       <div className="container-x flex h-16 items-center justify-between">
@@ -37,20 +25,7 @@ export async function SiteHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-3">
-          {signedIn ? (
-            <Link href="/dashboard" className="btn-primary h-10 px-5 text-sm">
-              Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" className="hidden text-sm font-medium text-slate-700 hover:text-slate-900 sm:inline">
-                Sign in
-              </Link>
-              <Link href="/signup" className="btn-primary h-10 px-5 text-sm">
-                Get started
-              </Link>
-            </>
-          )}
+          <HeaderAuthCta />
         </div>
       </div>
     </header>

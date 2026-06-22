@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { supabaseConfigured } from "@/lib/env";
 import type {
   Job,
@@ -27,8 +28,20 @@ async function safe<T>(fn: (db: Awaited<ReturnType<typeof createClient>>) => Pro
   }
 }
 
+// Like safe(), but uses the cookieless public client so the calling page can be
+// statically rendered / ISR-cached. Only for anon-readable public content.
+async function safePublic<T>(fn: (db: ReturnType<typeof createPublicClient>) => Promise<T>, fallback: T): Promise<T> {
+  if (!supabaseConfigured) return fallback;
+  try {
+    return await fn(createPublicClient());
+  } catch (e) {
+    console.error("query error", e);
+    return fallback;
+  }
+}
+
 export function getJobs(): Promise<Job[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db
       .from("jobs")
       .select("*")
@@ -40,14 +53,14 @@ export function getJobs(): Promise<Job[]> {
 }
 
 export function getJob(id: string): Promise<Job | null> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db.from("jobs").select("*").eq("id", id).maybeSingle();
     return (data ?? null) as Job | null;
   }, null);
 }
 
 export function getBlogPosts(): Promise<BlogPost[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db
       .from("blog_posts")
       .select("*")
@@ -58,7 +71,7 @@ export function getBlogPosts(): Promise<BlogPost[]> {
 }
 
 export function getBlogPost(slug: string): Promise<BlogPost | null> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db
       .from("blog_posts")
       .select("*")
@@ -69,21 +82,21 @@ export function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 export function getMentors(): Promise<Mentor[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db.from("mentors").select("*").order("name");
     return (data ?? []) as Mentor[];
   }, []);
 }
 
 export function getEmployerInsights(): Promise<EmployerInsight[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db.from("employer_insights").select("*").order("company");
     return (data ?? []) as EmployerInsight[];
   }, []);
 }
 
 export function getTestimonials(): Promise<Testimonial[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db
       .from("testimonials")
       .select("*")
@@ -94,7 +107,7 @@ export function getTestimonials(): Promise<Testimonial[]> {
 }
 
 export function getFaqs(): Promise<Faq[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db
       .from("faqs")
       .select("*")
@@ -105,7 +118,7 @@ export function getFaqs(): Promise<Faq[]> {
 }
 
 export function getPricingPlans(): Promise<PricingPlan[]> {
-  return safe(async (db) => {
+  return safePublic(async (db) => {
     const { data } = await db.from("pricing_plans").select("*").order("display_order");
     return (data ?? []) as PricingPlan[];
   }, []);

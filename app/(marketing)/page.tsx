@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getTestimonials, getJobs } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 const FEATURES = [
   { icon: "🎯", title: "Visa-aware job board", body: "Every role flagged for Graduate Route and Skilled Worker sponsorship, so you never waste an application." },

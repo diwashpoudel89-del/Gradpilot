@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getFaqs } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 export const metadata: Metadata = { title: "FAQ", description: "Common questions about GradPilot AI, visas, and pricing." };
 
 export default async function FaqPage() {

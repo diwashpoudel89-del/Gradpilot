@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getBlogPosts } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Blog — UK visas, CVs & careers",
   description: "Guides on the Graduate Route, UK CVs, sponsorship, and life in the UK for international students.",

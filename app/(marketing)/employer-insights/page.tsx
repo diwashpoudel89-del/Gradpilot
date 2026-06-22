@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getEmployerInsights } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 export const metadata: Metadata = { title: "Employer insights", description: "Which UK employers sponsor international graduates — with timelines and insider tips." };
 
 export default async function EmployerInsightsPage() {

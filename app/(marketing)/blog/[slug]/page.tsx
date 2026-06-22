@@ -1,10 +1,16 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getBlogPost } from "@/lib/queries";
+import { getBlogPost, getBlogPosts } from "@/lib/queries";
 import { Markdown } from "@/components/markdown";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
+// Prerender published posts at build; new posts render on demand then cache.
+export async function generateStaticParams() {
+  const posts = await getBlogPosts();
+  return posts.map((p) => ({ slug: p.slug }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

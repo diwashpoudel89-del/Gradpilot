@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getMentors } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 export const metadata: Metadata = { title: "Mentors", description: "Learn from international graduates who built UK careers." };
 
 export default async function MentorsPage() {
