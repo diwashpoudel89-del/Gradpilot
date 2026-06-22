@@ -2,8 +2,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
-import { getSavedJobs, getApplications, getProfile } from "@/lib/queries";
+import { getSavedJobs, getApplications, getProfile, getJobs } from "@/lib/queries";
 import { STATUS_LABELS, type ApplicationStatus } from "@/lib/types";
+import { scoreJob, canMatch, matchTier } from "@/lib/matching";
 import { SavedJobActions } from "@/components/saved-job-actions";
 
 export const dynamic = "force-dynamic";
@@ -17,11 +18,20 @@ export default async function DashboardPage() {
   const user = data.user;
   if (!user) redirect("/login");
 
-  const [profile, savedJobs, applications] = await Promise.all([
+  const [profile, savedJobs, applications, allJobs] = await Promise.all([
     getProfile(user.id),
     getSavedJobs(user.id),
     getApplications(user.id),
+    getJobs(),
   ]);
+
+  const recommended = canMatch(profile)
+    ? allJobs
+        .map((j) => ({ job: j, ...scoreJob(j, profile) }))
+        .filter((r) => r.score >= 30)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+    : [];
 
   const name =
     profile?.full_name ||
@@ -96,6 +106,29 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Recommended for you */}
+      {recommended.length > 0 && (
+        <section className="mt-8">
+          <div className="flex items-center justify-between">
+            <h2 className="font-semibold text-slate-900">✨ Recommended for you</h2>
+            <Link href="/jobs" className="text-sm font-medium text-brand-600 hover:underline">See all matches →</Link>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {recommended.map(({ job, score, reasons }) => {
+              const tier = matchTier(score);
+              return (
+                <Link key={job.id} href={`/jobs/${job.id}`} className="card p-5 transition hover:shadow-lift">
+                  <span className={`badge ${tier.className}`}>{score}% · {tier.label}</span>
+                  <h3 className="mt-3 font-semibold text-slate-900">{job.title}</h3>
+                  <p className="text-sm text-slate-500">{job.company}{job.location ? ` · ${job.location}` : ""}</p>
+                  {reasons[0] && <p className="mt-2 text-xs text-slate-600">✓ {reasons[0]}</p>}
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Saved jobs */}
       <section className="mt-8 card p-6">
