@@ -44,6 +44,16 @@ export async function removeSavedJob(id: string) {
   revalidatePath("/dashboard");
 }
 
+export async function updateSavedJobNotes(id: string, notes: string) {
+  const { supabase, user } = await requireUser();
+  await supabase
+    .from("saved_jobs")
+    .update({ notes })
+    .eq("id", id)
+    .eq("user_id", user.id);
+  revalidatePath("/dashboard");
+}
+
 // ---- Applications ----
 
 export async function addApplication(input: {

@@ -6,6 +6,7 @@ import { getApplications } from "@/lib/queries";
 import { APPLICATION_STATUSES, STATUS_LABELS, type ApplicationStatus } from "@/lib/types";
 import { AddApplicationForm } from "@/components/add-application-form";
 import { ApplicationStatusSelect } from "@/components/application-status-select";
+import { NotesEditor } from "@/components/notes-editor";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Applications" };
@@ -50,21 +51,26 @@ export default async function ApplicationsPage() {
                 </h2>
                 <div className="card divide-y divide-slate-100">
                   {group.map((a) => (
-                    <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                      <div className="min-w-0">
-                        <div className="font-medium text-slate-900">
-                          {a.job_id ? (
-                            <Link href={`/jobs/${a.job_id}`} className="hover:text-brand-600">{a.job_title}</Link>
-                          ) : (
-                            a.job_title
-                          )}
+                    <div key={a.id} className="p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-900">
+                            {a.job_id ? (
+                              <Link href={`/jobs/${a.job_id}`} className="hover:text-brand-600">{a.job_title}</Link>
+                            ) : (
+                              a.job_title
+                            )}
+                          </div>
+                          <div className="text-sm text-slate-500">
+                            {a.company}
+                            {a.applied_at ? ` · applied ${a.applied_at}` : ""}
+                          </div>
                         </div>
-                        <div className="text-sm text-slate-500">
-                          {a.company}
-                          {a.applied_at ? ` · applied ${a.applied_at}` : ""}
-                        </div>
+                        <ApplicationStatusSelect id={a.id} status={(a.status ?? "saved") as ApplicationStatus} />
                       </div>
-                      <ApplicationStatusSelect id={a.id} status={(a.status ?? "saved") as ApplicationStatus} />
+                      <div className="mt-2">
+                        <NotesEditor kind="application" id={a.id} initialNotes={a.notes} />
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -6,6 +6,7 @@ import { getSavedJobs, getApplications, getProfile, getJobs } from "@/lib/querie
 import { STATUS_LABELS, type ApplicationStatus } from "@/lib/types";
 import { scoreJob, canMatch, matchTier } from "@/lib/matching";
 import { SavedJobActions } from "@/components/saved-job-actions";
+import { NotesEditor } from "@/components/notes-editor";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Dashboard" };
@@ -143,18 +144,23 @@ export default async function DashboardPage() {
         ) : (
           <ul className="mt-4 divide-y divide-slate-100">
             {savedJobs.map((j) => (
-              <li key={j.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div>
-                  {j.job_id ? (
-                    <Link href={`/jobs/${j.job_id}`} className="font-medium text-slate-900 hover:text-brand-600">
-                      {j.job_title}
-                    </Link>
-                  ) : (
-                    <span className="font-medium text-slate-900">{j.job_title}</span>
-                  )}
-                  <span className="text-sm text-slate-500"> · {j.company}</span>
+              <li key={j.id} className="py-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    {j.job_id ? (
+                      <Link href={`/jobs/${j.job_id}`} className="font-medium text-slate-900 hover:text-brand-600">
+                        {j.job_title}
+                      </Link>
+                    ) : (
+                      <span className="font-medium text-slate-900">{j.job_title}</span>
+                    )}
+                    <span className="text-sm text-slate-500"> · {j.company}</span>
+                  </div>
+                  <SavedJobActions id={j.id} jobTitle={j.job_title ?? ""} company={j.company ?? ""} jobId={j.job_id} />
                 </div>
-                <SavedJobActions id={j.id} jobTitle={j.job_title ?? ""} company={j.company ?? ""} jobId={j.job_id} />
+                <div className="mt-2">
+                  <NotesEditor kind="savedJob" id={j.id} initialNotes={j.notes} />
+                </div>
               </li>
             ))}
           </ul>
