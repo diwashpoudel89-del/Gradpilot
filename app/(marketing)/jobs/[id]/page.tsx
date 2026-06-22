@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { getJob } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/server";
 import { SaveJobButton } from "@/components/save-job-button";
+import { AppliedButton } from "@/components/applied-button";
 
 export const dynamic = "force-dynamic";
 
@@ -28,14 +29,24 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   const supabase = await createClient();
   const { data: auth } = await supabase.auth.getUser();
   let initialSaved = false;
+  let initialApplied = false;
   if (auth.user) {
-    const { data: saved } = await supabase
-      .from("saved_jobs")
-      .select("id")
-      .eq("user_id", auth.user.id)
-      .eq("job_id", job.id)
-      .maybeSingle();
+    const [{ data: saved }, { data: applied }] = await Promise.all([
+      supabase
+        .from("saved_jobs")
+        .select("id")
+        .eq("user_id", auth.user.id)
+        .eq("job_id", job.id)
+        .maybeSingle(),
+      supabase
+        .from("applications")
+        .select("id")
+        .eq("user_id", auth.user.id)
+        .eq("job_id", job.id)
+        .maybeSingle(),
+    ]);
     initialSaved = !!saved;
+    initialApplied = !!applied;
   }
 
   const jsonLd = {
@@ -116,6 +127,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
               jobTitle={job.title}
               company={job.company}
               initialSaved={initialSaved}
+              isAuthed={!!auth.user}
+            />
+            <AppliedButton
+              jobId={job.id}
+              jobTitle={job.title}
+              company={job.company}
+              initialApplied={initialApplied}
               isAuthed={!!auth.user}
             />
           </div>

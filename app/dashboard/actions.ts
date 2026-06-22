@@ -66,6 +66,33 @@ export async function addApplication(input: {
   revalidatePath("/dashboard/applications");
 }
 
+// Mark a job as applied from the public job page. Idempotent: if an application
+// for this job already exists it is left untouched so repeated clicks are safe.
+export async function markJobApplied(input: { jobId: string; jobTitle: string; company: string }) {
+  const { supabase, user } = await requireUser();
+  const { data: existing } = await supabase
+    .from("applications")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("job_id", input.jobId)
+    .maybeSingle();
+
+  if (!existing) {
+    await supabase.from("applications").insert({
+      user_id: user.id,
+      job_id: input.jobId,
+      job_title: input.jobTitle,
+      company: input.company,
+      status: "applied",
+      applied_at: new Date().toISOString().slice(0, 10),
+    });
+  }
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/applications");
+  revalidatePath(`/jobs/${input.jobId}`);
+  return { applied: true };
+}
+
 export async function updateApplicationStatus(id: string, status: ApplicationStatus) {
   if (!APPLICATION_STATUSES.includes(status)) throw new Error("Invalid status");
   const { supabase, user } = await requireUser();
