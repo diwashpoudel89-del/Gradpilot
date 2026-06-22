@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getTestimonials, getJobs } from "@/lib/queries";
 
 export const revalidate = 3600;
@@ -76,8 +77,7 @@ export default async function HomePage() {
                   <blockquote className="mt-3 flex-1 text-sm text-slate-700">“{t.content}”</blockquote>
                   <figcaption className="mt-4 flex items-center gap-3">
                     {t.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={t.avatar_url} alt="" className="size-9 rounded-full bg-slate-200" />
+                      <Image src={t.avatar_url} alt={t.name} width={36} height={36} className="size-9 rounded-full bg-slate-200 object-cover" />
                     ) : (
                       <span className="grid size-9 place-items-center rounded-full bg-brand-100 text-sm font-semibold text-brand-700">
                         {t.name.charAt(0)}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { getMentors } from "@/lib/queries";
 
 export const revalidate = 3600;
@@ -17,8 +18,7 @@ export default async function MentorsPage() {
           <div key={m.id} className="card p-6">
             <div className="flex items-center gap-3">
               {m.photo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.photo_url} alt="" className="size-12 rounded-full bg-slate-200" />
+                <Image src={m.photo_url} alt={m.name} width={48} height={48} className="size-12 rounded-full bg-slate-200 object-cover" />
               ) : (
                 <span className="grid size-12 place-items-center rounded-full bg-brand-100 text-base font-semibold text-brand-700">{m.name.charAt(0)}</span>
               )}
