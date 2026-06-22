@@ -181,6 +181,18 @@ export async function updateProfile(formData: FormData) {
   revalidatePath("/dashboard/profile");
 }
 
+// ---- Account ----
+
+// GDPR: permanently delete the signed-in user's account and all their data via
+// the SECURITY DEFINER delete_own_account() function, then sign out.
+export async function deleteAccount() {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("delete_own_account");
+  if (error) throw new Error(error.message);
+  await supabase.auth.signOut();
+  redirect("/?deleted=1");
+}
+
 // ---- Onboarding ----
 
 // Save the profile from the onboarding form and send the user into the app.

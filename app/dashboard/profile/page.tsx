@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/queries";
 import { updateProfile } from "@/app/dashboard/actions";
+import { DeleteAccount } from "@/components/delete-account";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Profile" };
@@ -53,6 +54,8 @@ export default async function ProfilePage() {
           <span className="text-sm text-slate-500">Signed in as {profile?.email ?? data.user.email}</span>
         </div>
       </form>
+
+      <DeleteAccount />
     </div>
   );
 }
