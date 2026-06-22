@@ -30,6 +30,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </form>
           </div>
         </div>
+        {/* Mobile nav: the desktop nav is hidden below sm, so surface the links here. */}
+        <div className="container-x sm:hidden">
+          <DashboardNav className="-mx-1 flex items-center gap-1 overflow-x-auto pb-2" />
+        </div>
       </header>
       <main className="container-x py-10">{children}</main>
     </div>

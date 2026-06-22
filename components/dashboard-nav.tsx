@@ -9,10 +9,10 @@ const LINKS = [
   { href: "/dashboard/profile", label: "Profile" },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ className = "hidden items-center gap-1 sm:flex" }: { className?: string }) {
   const pathname = usePathname();
   return (
-    <nav className="hidden items-center gap-1 sm:flex">
+    <nav className={className}>
       {LINKS.map((l) => {
         const active = l.href === "/dashboard" ? pathname === l.href : pathname.startsWith(l.href);
         return (
