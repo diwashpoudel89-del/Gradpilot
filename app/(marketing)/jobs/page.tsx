@@ -4,8 +4,15 @@ import { getJobs } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
-  title: "Visa-sponsoring jobs",
-  description: "Graduate and skilled-worker jobs in the UK that sponsor international students.",
+  title: "Visa-sponsoring jobs for international students in the UK",
+  description:
+    "Browse UK graduate jobs flagged for Graduate Route and Skilled Worker visa sponsorship. Every role checked — so you only apply where you can actually work.",
+  keywords: ["visa sponsorship jobs UK", "Graduate Route jobs", "Skilled Worker visa jobs UK", "international student jobs UK", "graduate jobs visa sponsor"],
+  alternates: { canonical: "/jobs" },
+  openGraph: {
+    title: "UK visa-sponsoring jobs for international students",
+    description: "Every role flagged for Graduate Route and Skilled Worker sponsorship.",
+  },
 };
 
 function SponsorBadge({ grad, skilled }: { grad: boolean | null; skilled: boolean | null }) {
