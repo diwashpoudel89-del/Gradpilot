@@ -4,8 +4,11 @@ import { getBlogPosts } from "@/lib/queries";
 
 export const revalidate = 3600;
 export const metadata: Metadata = {
-  title: "Blog — UK visas, CVs & careers",
-  description: "Guides on the Graduate Route, UK CVs, sponsorship, and life in the UK for international students.",
+  title: "Blog — Graduate Route, UK CVs & visa sponsorship guides",
+  description:
+    "In-depth guides on the Graduate Route deadline, how to write a UK CV as an international student, visa sponsorship, and navigating the UK job market. Written by people who&apos;ve done it.",
+  alternates: { canonical: "/blog" },
+  openGraph: { title: "GradPilot AI Blog — Graduate Route & UK career guides for international students" },
 };
 
 export default async function BlogPage() {

@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import { getEmployerInsights } from "@/lib/queries";
 
 export const revalidate = 3600;
-export const metadata: Metadata = { title: "Employer insights", description: "Which UK employers sponsor international graduates — with timelines and insider tips." };
+export const metadata: Metadata = {
+  title: "UK employer visa sponsorship insights for international graduates",
+  description:
+    "Find out which UK employers sponsor Graduate Route and Skilled Worker visas for international graduates — with average salaries, application difficulty ratings, and insider tips.",
+  keywords: ["UK employers that sponsor visas", "Skilled Worker sponsor UK", "which companies sponsor international graduates UK", "visa sponsorship employer list UK"],
+  alternates: { canonical: "/employer-insights" },
+};
 
 export default async function EmployerInsightsPage() {
   const employers = await getEmployerInsights();
