@@ -1,13 +1,30 @@
 import type { Metadata } from "next";
 import { getFaqs } from "@/lib/queries";
 
-export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "FAQ", description: "Common questions about GradPilot AI, visas, and pricing." };
+export const revalidate = 3600;
+export const metadata: Metadata = {
+  title: "FAQ — Graduate Route, Skilled Worker visa & GradPilot AI",
+  description:
+    "Answers to the most common questions about the Graduate Route visa, Skilled Worker visa sponsorship, and how GradPilot AI helps international students find UK jobs.",
+  alternates: { canonical: "/faq" },
+};
 
 export default async function FaqPage() {
   const faqs = await getFaqs();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: { "@type": "Answer", text: f.answer },
+    })),
+  };
   return (
     <div className="container-x py-12">
+      {faqs.length > 0 && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      )}
       <header className="mx-auto max-w-2xl text-center">
         <h1 className="font-display text-3xl font-bold tracking-tight">Frequently asked questions</h1>
       </header>
