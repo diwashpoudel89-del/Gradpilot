@@ -30,9 +30,14 @@ export default async function DashboardPage() {
       <header className="border-b border-slate-200 bg-white">
         <div className="container-x flex h-16 items-center justify-between">
           <Logo />
-          <form action="/auth/signout" method="post">
-            <button type="submit" className="btn-outline h-9 px-4 text-sm">Sign out</button>
-          </form>
+          <div className="flex items-center gap-3">
+            <Link href="/settings" className="text-sm font-medium text-slate-600 hover:text-slate-900">
+              Settings &amp; billing
+            </Link>
+            <form action="/auth/signout" method="post">
+              <button type="submit" className="btn-outline h-9 px-4 text-sm">Sign out</button>
+            </form>
+          </div>
         </div>
       </header>
 

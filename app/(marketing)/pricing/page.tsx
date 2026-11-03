@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getPricingPlans } from "@/lib/queries";
+import { getCurrentUser } from "@/lib/supabase/auth";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Pricing", description: "Simple, transparent pricing. Start free." };
@@ -11,8 +12,10 @@ const FALLBACK = [
 ];
 
 export default async function PricingPage() {
-  const fromDb = await getPricingPlans();
+  const [fromDb, user] = await Promise.all([getPricingPlans(), getCurrentUser().catch(() => null)]);
   const plans = fromDb.length ? fromDb : FALLBACK;
+  // Paid plans go to checkout (Plan & billing); signed-out visitors sign up first and land there.
+  const paidHref = user ? "/settings/plan" : "/signup?next=/settings/plan";
 
   return (
     <div className="container-x py-16">
@@ -37,7 +40,7 @@ export default async function PricingPage() {
                 <li key={i} className="flex gap-2"><span className="text-emerald-600">✓</span>{f}</li>
               ))}
             </ul>
-            <Link href="/signup" className={`mt-6 h-11 px-5 text-sm ${p.is_featured ? "btn-primary" : "btn-outline"}`}>
+            <Link href={(p.monthly_price ?? 0) > 0 ? paidHref : "/signup"} className={`mt-6 h-11 px-5 text-sm ${p.is_featured ? "btn-primary" : "btn-outline"}`}>
               {p.cta_text ?? "Get started"}
             </Link>
           </div>
