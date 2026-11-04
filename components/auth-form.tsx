@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +20,18 @@ function friendlyAuthError(err: unknown): string {
   return message;
 }
 
+// Supabase's minimum gap between emails to the same address.
+const EMAIL_COOLDOWN_SECONDS = 60;
+const NEWEST_LINK_NOTE =
+  "Only the newest email works. Older links stop working once you request a new one.";
+
+// "jane.doe@gmail.com" -> "j***@gmail.com"
+function maskEmail(email: string): string {
+  const [user, domain] = email.split("@");
+  if (!user || !domain) return email;
+  return `${user[0]}***@${domain}`;
+}
+
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -33,8 +45,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   );
   const [info, setInfo] = useState("");
   const [confirmationEmail, setConfirmationEmail] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+
+  // Shows a friendly error; if Supabase says "wait N seconds", count that down.
+  function showEmailError(err: unknown) {
+    const wait = err instanceof Error ? err.message.match(/after (\d+) seconds?/i) : null;
+    if (wait) setCooldown(Number(wait[1]));
+    setError(friendlyAuthError(err));
+  }
+
+  function emailSent(lead: string, email: string) {
+    setCooldown(EMAIL_COOLDOWN_SECONDS);
+    setInfo(`${lead} ${maskEmail(email)}. Check your inbox and spam folder. ${NEWEST_LINK_NOTE}`);
+  }
 
   async function sendPasswordReset() {
+    if (cooldown > 0) return;
     const input = document.querySelector<HTMLInputElement>('#email');
     const email = input?.value.trim().toLowerCase() ?? "";
     if (!email) {
@@ -48,10 +80,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
     });
+    setInfo("");
     if (error) {
-      setError(friendlyAuthError(error));
+      showEmailError(error);
     } else {
-      setInfo("Password reset email sent. Check your inbox and spam folder.");
+      emailSent("Password reset email sent to", email);
     }
     setStatus("idle");
   }
@@ -63,7 +96,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   async function resendConfirmation() {
-    if (!confirmationEmail) return;
+    if (!confirmationEmail || cooldown > 0) return;
     setStatus("loading");
     setError("");
     const supabase = createClient();
@@ -72,10 +105,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       email: confirmationEmail,
       options: { emailRedirectTo: confirmationRedirect() },
     });
+    setInfo("");
     if (error) {
-      setError(friendlyAuthError(error));
+      showEmailError(error);
     } else {
-      setInfo("We sent a fresh confirmation link. Check your inbox and spam folder.");
+      emailSent("We sent a fresh confirmation link to", confirmationEmail);
     }
     setStatus("idle");
   }
@@ -119,7 +153,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           router.refresh();
         } else {
           setConfirmationEmail(email);
-          setInfo("Check your email to confirm your account. The link will sign you in automatically.");
+          setCooldown(EMAIL_COOLDOWN_SECONDS);
+          setInfo(
+            `We sent a confirmation link to ${maskEmail(email)}. Check your inbox and spam folder. The link will sign you in automatically.`
+          );
           setStatus("idle");
         }
       } else {
@@ -138,7 +175,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         router.refresh();
       }
     } catch (err) {
-      setError(friendlyAuthError(err));
+      showEmailError(err);
       setStatus("idle");
     }
   }
@@ -171,10 +208,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <button
             type="button"
             onClick={sendPasswordReset}
-            disabled={status === "loading"}
-            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+            disabled={status === "loading" || cooldown > 0}
+            className="text-sm font-medium text-brand-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
           >
-            Forgot your password?
+            {cooldown > 0 ? `Send another reset email in ${cooldown}s` : "Forgot your password?"}
           </button>
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -182,11 +219,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         {confirmationEmail && (
           <button
             type="button"
-            disabled={status === "loading"}
+            disabled={status === "loading" || cooldown > 0}
             onClick={resendConfirmation}
-            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+            className="text-sm font-medium text-brand-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
           >
-            Resend confirmation email
+            {cooldown > 0 ? `Resend confirmation email in ${cooldown}s` : "Resend confirmation email"}
           </button>
         )}
         <button type="submit" disabled={status === "loading"} className="btn-primary h-12 w-full px-7 text-sm">
