@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand";
+import { LEGAL_PAGES } from "@/lib/legal";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-slate-200 bg-slate-50">
-      <div className="container-x grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="container-x grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-5">
         <div className="space-y-3">
           <Logo />
           <p className="max-w-xs text-sm text-slate-600">
@@ -34,6 +35,14 @@ export function SiteFooter() {
           <ul className="mt-3 space-y-2 text-sm text-slate-600">
             <li><Link href="/signup" className="hover:text-slate-900">Create account</Link></li>
             <li><Link href="/login" className="hover:text-slate-900">Sign in</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="text-sm font-semibold text-slate-900">Legal</h4>
+          <ul className="mt-3 space-y-2 text-sm text-slate-600">
+            {LEGAL_PAGES.map((p) => (
+              <li key={p.href}><Link href={p.href} className="hover:text-slate-900">{p.label}</Link></li>
+            ))}
           </ul>
         </div>
       </div>

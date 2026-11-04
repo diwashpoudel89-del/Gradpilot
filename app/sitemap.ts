@@ -13,6 +13,12 @@ const STATIC: MetadataRoute.Sitemap = [
   { url: `${BASE}/about`,             lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   { url: `${BASE}/faq`,               lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   { url: `${BASE}/waitlist`,          lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+  ...["/terms", "/privacy", "/cookies", "/refunds", "/ai-disclaimer"].map((path) => ({
+    url: `${BASE}${path}`,
+    lastModified: new Date(),
+    changeFrequency: "yearly" as const,
+    priority: 0.3,
+  })),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
