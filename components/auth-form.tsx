@@ -5,6 +5,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+// Turns Supabase's email rate-limit errors into messages users can act on.
+function friendlyAuthError(err: unknown): string {
+  if (!(err instanceof Error)) return "Something went wrong. Please try again.";
+  const code = (err as { code?: string }).code;
+  const message = err.message;
+  const wait = message.match(/after (\d+) seconds?/i);
+  if (wait) {
+    return `Please wait ${wait[1]} seconds before requesting another email.`;
+  }
+  if (code === "over_email_send_rate_limit" || /email rate limit/i.test(message)) {
+    return "We're sending a lot of emails right now and couldn't send yours. Please try again in a little while. If you already got an email from us, use the link in the newest one.";
+  }
+  return message;
+}
+
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -34,7 +49,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
     });
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error));
     } else {
       setInfo("Password reset email sent. Check your inbox and spam folder.");
     }
@@ -58,7 +73,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       options: { emailRedirectTo: confirmationRedirect() },
     });
     if (error) {
-      setError(error.message);
+      setError(friendlyAuthError(error));
     } else {
       setInfo("We sent a fresh confirmation link. Check your inbox and spam folder.");
     }
@@ -86,7 +101,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             emailRedirectTo: confirmationRedirect(),
           },
         });
-        if (error) throw error;
+        if (error) {
+          // A rate-limited signup still creates the account, just without an
+          // email, so offer the resend button for later.
+          if (error.code === "over_email_send_rate_limit") setConfirmationEmail(email);
+          throw error;
+        }
         // Supabase hides existing accounts: signing up again with a registered
         // email "succeeds" with no identities and sends no email.
         if (data.user && data.user.identities?.length === 0) {
@@ -118,7 +138,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(friendlyAuthError(err));
       setStatus("idle");
     }
   }
