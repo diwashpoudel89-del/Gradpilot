@@ -13,7 +13,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState(
     params.get("error") === "confirmation_failed"
-      ? "That confirmation link is invalid or has expired. Please request a new one."
+      ? "We couldn't finish signing you in from that link. If you opened it on a different device or browser, your email is probably already confirmed. Try signing in below. If that fails, request a new confirmation email."
       : ""
   );
   const [info, setInfo] = useState("");
@@ -87,6 +87,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           },
         });
         if (error) throw error;
+        // Supabase hides existing accounts: signing up again with a registered
+        // email "succeeds" with no identities and sends no email.
+        if (data.user && data.user.identities?.length === 0) {
+          throw new Error(
+            "An account with this email already exists. Sign in instead, or use “Forgot your password?” on the sign-in page."
+          );
+        }
         if (data.session) {
           router.push(next);
           router.refresh();
