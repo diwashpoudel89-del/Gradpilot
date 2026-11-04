@@ -1,9 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+
+// Turns Supabase's email rate-limit errors into messages users can act on.
+function friendlyAuthError(err: unknown): string {
+  if (!(err instanceof Error)) return "Something went wrong. Please try again.";
+  const code = (err as { code?: string }).code;
+  const message = err.message;
+  const wait = message.match(/after (\d+) seconds?/i);
+  if (wait) {
+    return `Please wait ${wait[1]} seconds before requesting another email.`;
+  }
+  if (code === "over_email_send_rate_limit" || /email rate limit/i.test(message)) {
+    return "We're sending a lot of emails right now and couldn't send yours. Please try again in a little while. If you already got an email from us, use the link in the newest one.";
+  }
+  return message;
+}
+
+// Supabase's minimum gap between emails to the same address.
+const EMAIL_COOLDOWN_SECONDS = 60;
+const NEWEST_LINK_NOTE =
+  "Only the newest email works. Older links stop working once you request a new one.";
+
+// "jane.doe@gmail.com" -> "j***@gmail.com"
+function maskEmail(email: string): string {
+  const [user, domain] = email.split("@");
+  if (!user || !domain) return email;
+  return `${user[0]}***@${domain}`;
+}
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -13,13 +40,33 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState(
     params.get("error") === "confirmation_failed"
-      ? "That confirmation link is invalid or has expired. Please request a new one."
+      ? "We couldn't finish signing you in from that link. If you opened it on a different device or browser, your email is probably already confirmed. Try signing in below. If that fails, request a new confirmation email."
       : ""
   );
   const [info, setInfo] = useState("");
   const [confirmationEmail, setConfirmationEmail] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+
+  // Shows a friendly error; if Supabase says "wait N seconds", count that down.
+  function showEmailError(err: unknown) {
+    const wait = err instanceof Error ? err.message.match(/after (\d+) seconds?/i) : null;
+    if (wait) setCooldown(Number(wait[1]));
+    setError(friendlyAuthError(err));
+  }
+
+  function emailSent(lead: string, email: string) {
+    setCooldown(EMAIL_COOLDOWN_SECONDS);
+    setInfo(`${lead} ${maskEmail(email)}. Check your inbox and spam folder. ${NEWEST_LINK_NOTE}`);
+  }
 
   async function sendPasswordReset() {
+    if (cooldown > 0) return;
     const input = document.querySelector<HTMLInputElement>('#email');
     const email = input?.value.trim().toLowerCase() ?? "";
     if (!email) {
@@ -33,10 +80,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/update-password`,
     });
+    setInfo("");
     if (error) {
-      setError(error.message);
+      showEmailError(error);
     } else {
-      setInfo("Password reset email sent. Check your inbox and spam folder.");
+      emailSent("Password reset email sent to", email);
     }
     setStatus("idle");
   }
@@ -48,7 +96,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   async function resendConfirmation() {
-    if (!confirmationEmail) return;
+    if (!confirmationEmail || cooldown > 0) return;
     setStatus("loading");
     setError("");
     const supabase = createClient();
@@ -57,10 +105,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       email: confirmationEmail,
       options: { emailRedirectTo: confirmationRedirect() },
     });
+    setInfo("");
     if (error) {
-      setError(error.message);
+      showEmailError(error);
     } else {
-      setInfo("We sent a fresh confirmation link. Check your inbox and spam folder.");
+      emailSent("We sent a fresh confirmation link to", confirmationEmail);
     }
     setStatus("idle");
   }
@@ -86,13 +135,28 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
             emailRedirectTo: confirmationRedirect(),
           },
         });
-        if (error) throw error;
+        if (error) {
+          // A rate-limited signup still creates the account, just without an
+          // email, so offer the resend button for later.
+          if (error.code === "over_email_send_rate_limit") setConfirmationEmail(email);
+          throw error;
+        }
+        // Supabase hides existing accounts: signing up again with a registered
+        // email "succeeds" with no identities and sends no email.
+        if (data.user && data.user.identities?.length === 0) {
+          throw new Error(
+            "An account with this email already exists. Sign in instead, or use “Forgot your password?” on the sign-in page."
+          );
+        }
         if (data.session) {
           router.push(next);
           router.refresh();
         } else {
           setConfirmationEmail(email);
-          setInfo("Check your email to confirm your account. The link will sign you in automatically.");
+          setCooldown(EMAIL_COOLDOWN_SECONDS);
+          setInfo(
+            `We sent a confirmation link to ${maskEmail(email)}. Check your inbox and spam folder. The link will sign you in automatically.`
+          );
           setStatus("idle");
         }
       } else {
@@ -111,7 +175,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         router.refresh();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      showEmailError(err);
       setStatus("idle");
     }
   }
@@ -144,10 +208,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <button
             type="button"
             onClick={sendPasswordReset}
-            disabled={status === "loading"}
-            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+            disabled={status === "loading" || cooldown > 0}
+            className="text-sm font-medium text-brand-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
           >
-            Forgot your password?
+            {cooldown > 0 ? `Send another reset email in ${cooldown}s` : "Forgot your password?"}
           </button>
         )}
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -155,11 +219,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         {confirmationEmail && (
           <button
             type="button"
-            disabled={status === "loading"}
+            disabled={status === "loading" || cooldown > 0}
             onClick={resendConfirmation}
-            className="text-sm font-medium text-brand-600 hover:underline disabled:opacity-50"
+            className="text-sm font-medium text-brand-600 hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:no-underline"
           >
-            Resend confirmation email
+            {cooldown > 0 ? `Resend confirmation email in ${cooldown}s` : "Resend confirmation email"}
           </button>
         )}
         <button type="submit" disabled={status === "loading"} className="btn-primary h-12 w-full px-7 text-sm">
