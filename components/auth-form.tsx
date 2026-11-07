@@ -12,7 +12,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const urlError = params.get("error");
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [error, setError] = useState(
-    urlError === "auth" ? "We couldn't confirm that link. Please sign in again." : ""
+    urlError === "auth"
+      ? "We couldn't confirm that link. Please sign in again."
+      : urlError === "reset_expired"
+      ? "Your password reset link has expired. Please request a new one."
+      : ""
   );
   const [info, setInfo] = useState("");
 
@@ -79,7 +83,14 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <input id="email" name="email" type="email" autoComplete="email" required className="h-11 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200" placeholder="jane@university.ac.uk" />
         </div>
         <div>
-          <label htmlFor="password" className="mb-1.5 block text-sm font-medium">Password</label>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-medium">Password</label>
+            {mode === "login" && (
+              <Link href="/forgot-password" className="text-xs font-medium text-brand-600 hover:underline">
+                Forgot password?
+              </Link>
+            )}
+          </div>
           <input id="password" name="password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} className="h-11 w-full rounded-xl border border-slate-300 px-3.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-200" placeholder="••••••••" />
           {mode === "signup" && <p className="mt-1.5 text-xs text-slate-500">Use at least 8 characters.</p>}
         </div>
