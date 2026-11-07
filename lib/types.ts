@@ -17,6 +17,12 @@ export type Job = {
   is_active: boolean | null;
   is_featured: boolean | null;
   job_type: string | null;
+  posted_at?: string | null;
+  /** "manual" (added by GradPilot), "sample" (unverified demo data) or "adzuna". */
+  source?: "manual" | "sample" | "adzuna" | null;
+  source_url?: string | null;
+  salary_is_predicted?: boolean | null;
+  contract_type?: string | null;
 };
 
 export type BlogPost = {

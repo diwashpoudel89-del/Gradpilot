@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTestimonials, getJobs } from "@/lib/queries";
+import { getTestimonials, getJobsPage } from "@/lib/queries";
 
 export const revalidate = 3600;
 
@@ -88,8 +88,8 @@ const FAQ_SCHEMA = {
 };
 
 export default async function HomePage() {
-  const [testimonials, jobs] = await Promise.all([getTestimonials(), getJobs()]);
-  const jobCount = jobs.length;
+  const [testimonials, jobsPage] = await Promise.all([getTestimonials(), getJobsPage()]);
+  const jobCount = jobsPage.total;
 
   return (
     <>
